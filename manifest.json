@@ -1,0 +1,15 @@
+{
+  "name": "hermes-fallback",
+  "label": "Fallback",
+  "description": "Manifest-style fallback chain editor for the Hermes Models dashboard.",
+  "icon": "Route",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/hermes-fallback",
+    "hidden": true
+  },
+  "slots": ["models:top"],
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

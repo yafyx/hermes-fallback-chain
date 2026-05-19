@@ -1,0 +1,245 @@
+.hf-panel {
+  width: 100%;
+  margin: 0;
+}
+
+.hf-head-actions,
+.hf-row-actions,
+.hf-footer-actions,
+.hf-add-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.hf-status {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.hf-alert {
+  margin: 0 0 0.5rem;
+  padding: 0.55rem 0.7rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.hf-alert-error {
+  border: 1px solid color-mix(in oklab, var(--color-destructive) 42%, transparent);
+  background: color-mix(in oklab, var(--color-destructive) 8%, transparent);
+  color: var(--color-destructive);
+}
+
+.hf-alert-ok {
+  border: 1px solid color-mix(in oklab, var(--color-primary) 35%, transparent);
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  color: var(--color-primary);
+}
+
+.hf-routing-stack {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.hf-model-card,
+.hf-empty-card,
+.hf-add-panel {
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  border-radius: 0.375rem;
+}
+
+.hf-model-card {
+  border-radius: 0;
+}
+
+.hf-model-card,
+.hf-empty-card,
+.hf-add-panel {
+  padding: 0.75rem;
+}
+
+.hf-primary-card {
+  background: color-mix(in oklab, var(--color-card) 88%, var(--color-muted) 12%);
+}
+
+.hf-primary-card.is-drop-primary {
+  border-color: color-mix(in oklab, var(--color-primary) 70%, var(--color-border) 30%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 40%, transparent);
+}
+
+.hf-model-topline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.hf-model-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.hf-model-provider,
+.hf-model-note,
+.hf-empty-copy,
+.hf-sync,
+.hf-field,
+.hf-muted {
+  color: var(--color-muted-foreground);
+}
+
+.hf-model-provider,
+.hf-model-note,
+.hf-empty-copy,
+.hf-sync,
+.hf-field {
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.hf-model-provider {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hf-chain-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.hf-empty-title {
+  color: var(--color-foreground);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.hf-empty-copy {
+  margin-top: 0.2rem;
+}
+
+.hf-fallback-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: center;
+  cursor: grab;
+  background: var(--color-background);
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease,
+    opacity 120ms ease;
+}
+
+.hf-fallback-card:hover {
+  background: color-mix(in oklab, var(--color-background) 85%, var(--color-muted) 15%);
+}
+
+.hf-fallback-card:active {
+  transform: scale(0.98);
+}
+
+.hf-fallback-card.is-dragging {
+  cursor: grabbing;
+  opacity: 0.58;
+}
+
+.hf-fallback-card.is-drop-target {
+  border-color: color-mix(in oklab, var(--color-primary) 70%, var(--color-border) 30%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 40%, transparent);
+}
+
+.hf-drag-handle {
+  color: var(--color-muted-foreground);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.78rem;
+}
+
+.hf-add-fields {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.hf-field {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.hf-select {
+  width: 100%;
+  min-width: 0;
+  height: 2rem;
+  border: 1px solid var(--color-input);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  padding: 0 0.55rem;
+  border-radius: 0.375rem;
+  font-size: 0.78rem;
+}
+
+.hf-select:disabled {
+  opacity: 0.58;
+}
+
+.hf-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid color-mix(in oklab, var(--color-border) 80%, transparent);
+}
+
+.hf-dirty {
+  color: var(--color-primary);
+}
+
+.hf-remove-button {
+  min-width: 3.9rem;
+}
+
+.hf-small-button,
+.hf-save-button,
+.hf-add-toggle,
+.hf-primary-action {
+  transition: transform 120ms ease;
+}
+
+.hf-small-button:active:not(:disabled),
+.hf-save-button:active:not(:disabled),
+.hf-add-toggle:active:not(:disabled),
+.hf-primary-action:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+@media (min-width: 720px) {
+  .hf-add-fields {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hf-head-actions,
+  .hf-footer {
+    justify-content: flex-start;
+  }
+
+  .hf-fallback-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hf-drag-handle {
+    display: none;
+  }
+}
