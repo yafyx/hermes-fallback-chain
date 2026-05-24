@@ -51,8 +51,8 @@ The plugin writes this top-level config key:
 
 ```yaml
 fallback_providers:
-  - provider: openrouter
-    model: anthropic/claude-sonnet-4
+  - provider: openai-codex
+    model: gpt-5.3-codex
 ```
 
 When saving, it removes the legacy `fallback_model` key so there is one source of truth. Reads still merge `fallback_providers` and legacy `fallback_model` through Hermes' own fallback helper.
