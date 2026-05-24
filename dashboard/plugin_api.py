@@ -3,14 +3,13 @@
 Mounted by Hermes at /api/plugins/hermes-fallback/.
 """
 
-from __future__ import annotations
-
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from hermes_cli.config import load_config, save_config
+from hermes_cli.fallback_config import get_fallback_chain
 
 
 router = APIRouter()
@@ -28,6 +27,18 @@ class ChainUpdate(BaseModel):
     primary: Optional[FallbackEntry] = None
 
 
+def _model_to_dict(model: BaseModel) -> Dict[str, Any]:
+    if hasattr(model, "model_dump"):
+        return model.model_dump()
+    return model.dict()
+
+
+def _normalized_base_url(value: Any) -> str:
+    if not isinstance(value, str):
+        return ""
+    return value.strip().rstrip("/")
+
+
 def _clean_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     provider = str(entry.get("provider") or "").strip()
     model = str(entry.get("model") or entry.get("default") or "").strip()
@@ -35,7 +46,7 @@ def _clean_entry(entry: Dict[str, Any]) -> Dict[str, str]:
         return {}
 
     cleaned: Dict[str, str] = {"provider": provider, "model": model}
-    base_url = str(entry.get("base_url") or "").strip()
+    base_url = _normalized_base_url(entry.get("base_url"))
     if base_url:
         cleaned["base_url"] = base_url
     api_mode = str(entry.get("api_mode") or "").strip()
@@ -44,33 +55,36 @@ def _clean_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     return cleaned
 
 
+def _clean_entries(raw: Any) -> List[Dict[str, str]]:
+    if isinstance(raw, dict):
+        candidates = [raw]
+    elif isinstance(raw, list):
+        candidates = raw
+    else:
+        return []
+
+    return [
+        cleaned
+        for entry in candidates
+        if isinstance(entry, dict) and (cleaned := _clean_entry(entry))
+    ]
+
+
 def _read_chain(config: Dict[str, Any]) -> tuple[List[Dict[str, str]], str, bool]:
     """Return normalized chain, source key, and whether legacy config exists."""
-    fallback_providers = config.get("fallback_providers")
-    if isinstance(fallback_providers, list):
-        chain = [
-            cleaned
-            for entry in fallback_providers
-            if isinstance(entry, dict) and (cleaned := _clean_entry(entry))
-        ]
-        if chain:
-            return chain, "fallback_providers", bool(config.get("fallback_model"))
+    chain = [_clean_entry(entry) for entry in get_fallback_chain(config)]
+    chain = [entry for entry in chain if entry]
 
-    legacy = config.get("fallback_model")
-    if isinstance(legacy, dict):
-        cleaned = _clean_entry(legacy)
-        if cleaned:
-            return [cleaned], "fallback_model", True
-    if isinstance(legacy, list):
-        chain = [
-            cleaned
-            for entry in legacy
-            if isinstance(entry, dict) and (cleaned := _clean_entry(entry))
-        ]
-        if chain:
-            return chain, "fallback_model", True
+    provider_entries = _clean_entries(config.get("fallback_providers"))
+    legacy_entries = _clean_entries(config.get("fallback_model"))
+    if provider_entries:
+        source = "fallback_providers"
+    elif legacy_entries:
+        source = "fallback_model"
+    else:
+        source = "none"
 
-    return [], "none", bool(legacy)
+    return chain, source, bool(config.get("fallback_model"))
 
 
 def _primary(config: Dict[str, Any]) -> Dict[str, str]:
@@ -87,17 +101,26 @@ def _primary(config: Dict[str, Any]) -> Dict[str, str]:
     return {"provider": "", "model": ""}
 
 
+def _entry_identity(entry: Dict[str, str]) -> tuple[str, str, str]:
+    return (
+        (entry.get("provider") or "").strip().lower(),
+        (entry.get("model") or "").strip().lower(),
+        _normalized_base_url(entry.get("base_url")).lower(),
+    )
+
+
 def _validate_chain(chain: List[Dict[str, str]], primary: Dict[str, str]) -> None:
     seen = set()
-    primary_key = (primary.get("provider") or "", primary.get("model") or "")
+    primary_key = _entry_identity(primary)
     for index, entry in enumerate(chain, start=1):
-        key = (entry.get("provider") or "", entry.get("model") or "")
+        key = _entry_identity(entry)
         if not key[0] or not key[1]:
             raise HTTPException(status_code=400, detail=f"fallback entry {index} needs provider and model")
         if key == primary_key:
             raise HTTPException(status_code=400, detail="fallback cannot match the current primary model")
         if key in seen:
-            raise HTTPException(status_code=400, detail=f"duplicate fallback entry: {key[0]} / {key[1]}")
+            base = f" / {entry['base_url']}" if entry.get("base_url") else ""
+            raise HTTPException(status_code=400, detail=f"duplicate fallback entry: {entry['provider']} / {entry['model']}{base}")
         seen.add(key)
 
 
@@ -110,8 +133,12 @@ def _set_primary(config: Dict[str, Any], primary: Dict[str, str]) -> None:
             model_cfg["model"] = primary["model"]
         if primary.get("base_url"):
             model_cfg["base_url"] = primary["base_url"]
+        else:
+            model_cfg.pop("base_url", None)
         if primary.get("api_mode"):
             model_cfg["api_mode"] = primary["api_mode"]
+        else:
+            model_cfg.pop("api_mode", None)
         return
 
     config["model"] = {
@@ -145,10 +172,10 @@ async def get_state() -> Dict[str, Any]:
 async def put_chain(body: ChainUpdate) -> Dict[str, Any]:
     config = load_config()
     current_primary = _primary(config)
-    requested_primary = _clean_entry(body.primary.dict()) if body.primary else current_primary
+    requested_primary = _clean_entry(_model_to_dict(body.primary)) if body.primary else current_primary
     if body.primary and not requested_primary:
         raise HTTPException(status_code=400, detail="primary needs provider and model")
-    chain = [_clean_entry(entry.dict()) for entry in body.chain]
+    chain = [_clean_entry(_model_to_dict(entry)) for entry in body.chain]
     chain = [entry for entry in chain if entry]
     _validate_chain(chain, requested_primary)
 

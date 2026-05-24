@@ -1,8 +1,8 @@
 {
   "name": "hermes-fallback",
   "label": "Fallback",
-  "description": "Manifest-style fallback chain editor for the Hermes Models dashboard.",
-  "icon": "Route",
+  "description": "Fallback chain editor for the Hermes Models dashboard.",
+  "icon": "Settings",
   "version": "0.1.0",
   "tab": {
     "path": "/hermes-fallback",
