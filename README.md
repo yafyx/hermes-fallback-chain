@@ -6,6 +6,10 @@ Hermes already supports `fallback_providers` in `config.yaml`. This plugin gives
 
 This is a dashboard plugin, not a tool or gateway plugin. It registers into the `models:top` slot and mounts two local backend routes under `/api/plugins/hermes-fallback/`.
 
+![Hermes fallback dashboard example](assets/hermes-fallback-example.png)
+
+![Hermes fallback dashboard example](assets/hermes-fallback.gif)
+
 ## Requirements
 
 - Hermes Agent v0.14.0 or newer.
